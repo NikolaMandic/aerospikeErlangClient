@@ -1,0 +1,32 @@
+keyTest inserts a specified number of keys and then performs a number of reads and writes.
+Usage key_c:
+-h host [default 127.0.0.1]
+-p port [default 3000]
+-n namespace [default test]
+-S set [default none (empty string)]
+-t threads [default 32]
+-k keys [default 10000]
+-c check: sends all data with a get request for server-side validation
+-r reads [default 10000]
+-w writes [default 10000]
+-M use read-modify-write, i.e., read generation and set it while writing
+-V is size of the value [default 100]
+-m timeout in millisec [default ?]
+-1 just run one-test
+-d is direct to this one host
+-D is the delay factor [default 0]
+-T is the TTL in seconds to send to the server [default 0]
+-v is verbose
+-s is silent. Silent shuts up very important errors, so use sparingly
+-i is integer mode [default: string]
+-b is blob mode [default: string]
+-z is the zero point: the key to start with [0]
+-f is value factor: key * f = value [1]
+-C is continue mode: ignore errors
+-A is batch reads: [default size 10]
+-R is to use shared memory: [max number of supported nodes are 32]
+-N is bin [default bin is value]
+-o number of generic ops with W:(100-W) write:read ratio 
+	[default 0: If non-zero, -w and -r will be ignored. Keep it zero for normal operations]
+-W number of writes per 100 ops 
+	[default 20: i.e 20 writes per 100 ops. This would be applicable with -o paramter ]

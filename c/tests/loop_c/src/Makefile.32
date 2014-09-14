@@ -1,0 +1,43 @@
+# Citrusleaf Foundation
+# Makefile
+
+DEPTH = ../../..
+include Makefile.in
+include Makefile.files
+
+DIR_INCLUDE = ../include $(DEPTH)/include
+
+DIR_OBJECT = ../obj/i86
+DIR_TARGET = ../lib32
+
+TARGET = loopTest
+
+INCLUDES = $(DIR_INCLUDE:%=-I%) 
+LIBRARIES = -lcitrusleaf  -lssl -lpthread -lrt
+LDFLAGS += -L$(DEPTH)/lib32
+
+OBJECTS = $(SOURCES:%.c=$(DIR_OBJECT)/%.o)
+DEPENDENCIES = $(OBJECTS:%.o=%.d)
+
+.PHONY: all
+all: loopTest
+
+
+.PHONY: clean
+clean:
+	/bin/rm -r -f $(OBJECTS) $(DIR_TARGET)/$(TARGET_S) $(DIR_TARGET)/$(TARGET_D)
+
+.PHONY: depclean
+depclean: clean
+	/bin/rm -f $(DEPENDENCIES)
+
+.PHONY: loopTest
+loopTest: $(OBJECTS)
+	mkdir -p $(DIR_TARGET)
+	$(CC) $(LDFLAGS) -m32 -o $(DIR_TARGET)/$(TARGET) $(OBJECTS) $(LIBRARIES)
+
+-include $(DEPENDENCIES)
+
+$(DIR_OBJECT)/%.o: %.c
+	mkdir -p $(DIR_OBJECT)
+	$(CC) $(CFLAGS_64) -fPIC -MMD -o $@ -c $(INCLUDES) $<

@@ -1,0 +1,6 @@
+# Citrusleaf Foundation
+# Makefiles
+#
+
+HEADERS = key.h 
+SOURCES = main.c key.c

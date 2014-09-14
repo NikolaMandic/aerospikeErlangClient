@@ -29,12 +29,12 @@ CLIENT_INCL = ./include
 # Aerospike Citrusleaf Include
 # The source files already expect to use "citrusleaf/citrusleaf.h", so do NOT
 # add the extra directory here.
-C_INCL = ../c/include
+C_INCL = ./c/include
 
 # Aerospike Client  Source and Objects
 DIR_SRC = ./src
-C_DIR_OBJ = ../c/obj/native
-C_DIR_SRC = ../c/src
+C_DIR_OBJ = ./c/obj/native
+C_DIR_SRC = ./c/src
 ER_DIR_OBJ = ./obj
 ER_DIR_SRC = ./src
 ER_ERL_DIR = .
@@ -77,7 +77,7 @@ LD = $(CC)
 # Needed to make everything available to the NIF ERLANG module
 SONAME = aerospike_nif.so
 
-TARGET_D = $(SONAME)
+TARGET_D = ./priv/$(SONAME)
 #-shared 
 LDFLAGS = -shared -Wl,-soname=$(SONAME) 
 LDFLAGS += -L$(DIR_ERL)/lib/erl_interface-$(EIVER)/lib -L. -L/usr/lib/
@@ -93,8 +93,11 @@ CFLAGS_NATIVE = -g -fno-common -fno-strict-aliasing -rdynamic  -Wextra $(AS_CFLA
 # CFLAGS_NATIVE = -g -O3  -fno-common -fno-strict-aliasing -rdynamic  -Wextra $(AS_CFLAGS) -D MARCH_$(MARCH_NATIVE)
 # ----------------------------------------------------------
 
-all: $(TARGET_D) $(ERL_BEAM_OBJECTS) $(ERL_BEAM_EXAMPLE_OBJECTS)
-
+all: compile
+       
+compile:       $(TARGET_D) $(ERL_BEAM_OBJECTS) $(ERL_BEAM_EXAMPLE_OBJECTS)
+	cp ./*.erl ./ebin
+	cp ./*.beam ./ebin
 examples: $(ERL_BEAM_EXAMPLE_OBJECTS) $(ERL_BEAM_OBJECTS)
 
 ER_OBJECTS : $(HEADERS) $(SOURCES)
