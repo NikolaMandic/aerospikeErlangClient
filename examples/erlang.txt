@@ -1,0 +1,140 @@
+%% This file contains example "cut/paste" Aerospike Commands that can be used
+%% in the Erlang Shell
+
+H="127.0.0.1" .
+Host="able".
+
+Host2="baker".
+Host3="s2".
+
+P=3000 .
+NS="test".
+K1="MyKeyONE" .
+K2="MyKeyTWO".
+S="myset".
+V1=[{"bin1","value1"}].
+V2=[{"bin2","value2"}].
+V11=[{"bin1","value1"}].
+V12=[{"bin1","value1"}].
+V21=[{"bin2","value2"}].
+V22=[{"bin2","value2"}].
+Pad="<<PADDING>>".
+
+KeyRoot = random:uniform( 100 ).
+KeyRootString =  io_lib:fwrite("~w",[KeyRoot]).
+
+NewKey = string:concat(KeyRootString, Pad).
+
+V1n=[{"mbin1","mvalue11"},{"mbin2","mvalue21"}].
+V2n=[{"mbin1","mvalue12"},{"mbin2","mvalue22"}].
+V3n=[{"mbin1","mvalue13"},{"mbin2","mvalue23"}].
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+{ok, C} = aerospike:connect( Host, P ).
+aerospike:addhost( C, Host2, P, 0 ).
+aerospike:addhost( C, Host3, P, 0 ).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+{ok, C} = aerospike:connect( H, P ).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+aerospike:put(C,NS,S,K1,V1,0).
+aerospike:getAll(C,NS,S,K1,0).
+aerospike:put(C,NS,S,NewKey,V2,0).
+aerospike:getAll(C,NS,S,NewKey,0).
+B1=[{"bin1"}].
+aerospike:get(C,NS,S,K1,B1,0).
+% ----------------------------------------
+atom1 = "my atom key".  %% This won't work: "atom1" is already a constant
+aerospike:put(C,NS,S,atom1,V2,0).
+% ----------------------------------------
+%% atom_key_one is its own value
+aerospike:put(C,NS,S,atom_key_one,V2,0).
+aerospike:put(C,NS,S,"New Test Key ONE",
+  [{"Test BIN ONE","TEST VALUE ONE"}],0).
+
+aerospike:put(C,NS,S,string:concat("New Test Key ONE",Pad),
+  [{"Test BIN ONE","TEST VALUE ONE"}],0).
+
+ComboKey = string:concat("New Test Key TWO",Pad).
+ComboValue = [{"Test BIN ONE","TEST VALUE ONE"}].
+aerospike:put(C,NS,S,ComboKey,ComboValue,0).
+aerospike:getAll(C,NS,S,ComboKey,0).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Here's some text to use with the Aerospike Command Line Interface (CLI)
+% You can read/write values directly from the Linux Shell
+%
+%Usage: cli [OPTIONS]...
+%Execute a command against an Aerospike cluster.
+%  -t, --target             a cluster node to query (host:port)
+%                           default: 127.0.0.1:3000
+%  -h, --host               host of the cluster node to query
+%                           default: 127.0.0.1
+%  -p, --port               port of the cluster node to query
+%                           default: 3000
+%  -o, --operand            the operand: get, set, delete
+%                           default: get
+%  -n  --namespace          the namespace to operate on
+%                           default: test
+%  -s  --set                the set the key belongs in
+%                           default: ""
+%  -k, --key                key
+%                           default: None
+%  -b, --bin                bin
+%                           default: ""
+%  -e, --recordttl          record TTL 
+%                           default: None
+%  -v, --value              value
+%  -d, --digest             digest
+%  -i, --integer-key        True, if key is a integer
+%  --verbose                make the request verbose
+%  -u, --usage              show usage
+%
+cli -o set -n "test" -s "myset" -k "MyKeyOne" -b "bin1" -v "Hey There"
+
+lcli -o get -n "test" -s "myset" -k "MyKeyOne" -b "bin1" 
+
+S="myset".
+{ok, C} = aerospike:connect(H, P).
+[H | T ] = RecordList.
+K1 = recordExample:storeRecord(C, NS, S, H ).
+
+cli -o delete -n "test" -s "myset" -k "MyKeyOne"
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+bench_test:bench(H,P,NS,S,20,80,32,200000,50000).
+bench_test:bench(H,P,NS,S,20,80,64,200000,50000).
+bench_test:bench(H,P,NS,S,20,80,128,200000,50000).
+
+H="127.0.0.1".
+P=3000 .
+NS="test".
+K1="MyKeyONE" .
+K2="MyKeyTWO".
+S="myset".
+V1=[{"bin1","value1"}].
+V2=[{"bin2","value2"}].
+{ok, C} = aerospike:connect( H, P ).
+aerospike:put(C,NS,S,K1,V1,0).
+aerospike:getAll(C,NS,S,K1,0).
+aerospike:put(C,NS,S,K2,V2,0).
+aerospike:getAll(C,NS,S,K2,0).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+cli -o get -s "myset" -k "MyKeyONE" -b "bin1"
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Advanced Tests for Records:  Look at "recordExample.erl" for
+% the details of how an application program might work.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+c(recordExample).
+Result = recordExample:populateRecordList().
+Result. %% View the list  ==>  {ok, [list]}
+
+H="127.0.0.1" .
+P=3000 .
+NS="test".
+S="myset".
+{ok, C} = aerospike:connect(H, P).
+{ ok, [_H | _T ] = Result.
+R1 = _H.
+K1 = recordExample:storeRecord(C, NS, S, R1 ).

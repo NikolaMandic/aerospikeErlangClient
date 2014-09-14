@@ -1,0 +1,35 @@
+
+
+General (Internal Gateway) Return Codes
+Number  Symbol                            Definition
+------------------------------------------------------------------------------
+  0     GW_OK                            | Operation Successful
+ -1     GW_CONNERROR_TOOMANY             | Too many cluster connections
+ -2     GW_CONNERROR_CLUSTER_CREATE_FAIL | Failed to create Aerospike client
+ -3     GW_CONNERROR_HANDLE_NOT_VALID    | Connection handle is not valid
+ -4     GW_ERROR_OUTOFMEMORY             | Out of memory
+ -5     GW_ERROR_HISTOGRAM_FAIL          | Failed to create gateway histograms
+ -6     GW_ERROR_STOPWATCH_SEQ           | Stopwatch command sequence error
+-----------------------------------------------------------------------------
+
+Specific Citrusleaf Return Codes
+Number  Symbol                            Definition
+------------------------------------------------------------------------------
+  0    CITRUSLEAF_OK                     | Operation Successful
+ -1    CITRUSLEAF_FAIL_CLIENT            | Out of memory or similar error
+ -2    CITRUSLEAF_FAIL_TIMEOUT           | Time expired before op completed
+ -3    CITRUSLEAF_FAIL_ASYNCQ_FULL       | Buffer Full, can't insert more
+  1    CITRUSLEAF_FAIL_UNKNOWN           | Unknown failure on the server side
+  2    CITRUSLEAF_FAIL_NOTFOUND          | Key Not Found (not a serious error)
+  3    CITRUSLEAF_FAIL_GENERATION        | likely a CAS write, then write failed
+  4    CITRUSLEAF_FAIL_PARAMETER         | Caller passed in bad parameters
+  5    CITRUSLEAF_FAIL_KEY_EXISTS        | Cannot replace key (change setting)
+  6    CITRUSLEAF_FAIL_BIN_EXISTS        | Cannot Overwrite Bin (change setting)
+  7    CITRUSLEAF_FAIL_CLUSTER_KEY_MISMATCH | Cluster Key Mismatch
+  8    CITRUSLEAF_FAIL_PARTITION_OUT_OF_SPACE | Partition out of space
+  9    CITRUSLEAF_FAIL_SERVERSIDE_TIMEOUT | Server time expired
+ 10    CITRUSLEAF_FAIL_NOXDS             | Cross Data Replication (XDR) error
+ 11    CITRUSLEAF_FAIL_UNAVAILABLE       | Node?  Unavailable
+ 12    CITRUSLEAF_FAIL_INCOMPATIBLE_TYPE | Op cannot be applied to that type
+ 13    CITRUSLEAF_FAIL_RECORD_TOO_BIG    | Record Too BIG
+ 14    CITRUSLEAF_FAIL_KEY_BUSY          | Key locked by another

@@ -1,0 +1,192 @@
+%% This file contains sample input for the Erlang shell to exercise
+%% the Aerospike  Erlang Client.
+%%
+%% First, define numerous variables that will hold useful values
+%%
+% Define the example Connection Parameters (Host, Port)
+H="127.0.0.1" .
+P=3000 .
+% Define the default Namespace and Set
+NS="test".
+S="myset".
+% Define some sample keys 
+K1="MyKeyONE" .
+K2="MyKeyTWO".
+%
+% Create some static keys and values
+% Single Bin Records
+V1=[{"bin1","value1"}].
+V2=[{"bin2","value2"}].
+%%
+%% Multi-bin records
+V11=[{"bin1","value_t1_b1"}, {"bin2","value_t1_b2"}].
+V21=[{"bin1","value_t2_b1"}, {"bin2","value_t2_b2"}].
+
+% Create some Keys and Values (as strings) "on the fly"
+% First, define some "padding" strings that we'll tack on to the end
+% of a (relatively) unique number
+
+% 10 byte padding
+Pad_10 = "<<PADDING>>".
+
+% 20 byte padding
+Pad_20   = "|-- <<PADDING>>-20-|".
+
+% 100 byte value
+Pad_100 =  "|-- <<PADDING>>20--||-- <<PADDING>>40--||-- <<PADDING>>60--||-- <<PADDING>>80--||-- <<PADDING>>100-|".
+
+% 1,000 byte value
+Pad_1000 =  "|-- <<PADDING>>20--||-- <<PADDING>>40--||-- <<PADDING>>60--|"++
+            "|-- <<PADDING>>80--||-- <<PADDING>>100-|"++
+            "|-- <<PADDING>>20--||-- <<PADDING>>40--||-- <<PADDING>>60--|"++
+            "|-- <<PADDING>>80--||-- <<PADDING>>200-|"++
+            "|-- <<PADDING>>20--||-- <<PADDING>>40--||-- <<PADDING>>60--|"++
+            "|-- <<PADDING>>80--||-- <<PADDING>>300-|"++
+            "|-- <<PADDING>>20--||-- <<PADDING>>40--||-- <<PADDING>>60--|"++
+            "|-- <<PADDING>>80--||-- <<PADDING>>400-|"++
+            "|-- <<PADDING>>20--||-- <<PADDING>>40--||-- <<PADDING>>60--|"++
+            "|-- <<PADDING>>80--||-- <<PADDING>>500-|"++
+            "|-- <<PADDING>>20--||-- <<PADDING>>40--||-- <<PADDING>>60--|"++
+            "|-- <<PADDING>>80--||-- <<PADDING>>600-|"==
+            "|-- <<PADDING>>20--||-- <<PADDING>>40--||-- <<PADDING>>60--|"++
+            "|-- <<PADDING>>80--||-- <<PADDING>>700-|"==
+            "|-- <<PADDING>>20--||-- <<PADDING>>40--||-- <<PADDING>>60--|"++
+            "|-- <<PADDING>>80--||-- <<PADDING>>800-|"==
+            "|-- <<PADDING>>20--||-- <<PADDING>>40--||-- <<PADDING>>60--|"++
+            "|-- <<PADDING>>80--||-- <<PADDING>>900-|"==
+            "|-- <<PADDING>>20--||-- <<PADDING>>40--||-- <<PADDING>>60--|"++
+            "|-- <<PADDING>>80--||-- <<PADDING>>1000|".
+
+% Now define some (relatively) unique keys and values, with a random number
+% as a root, and some amount of padding to give it size.
+% Value range is the upper limit (Zero is implicitly the lower limit)
+% for which we'll generate a Root
+ValueRange = 1000000.
+KeyRoot = random:uniform( 1000000 ).
+ValueRoot = random:uniform( 1000000 ).
+%
+% Turn that number into a string (Version 1 is all about strings)
+KeyRootString =  io_lib:fwrite("~p",[KeyRoot]).
+ValueRootString =  io_lib:fwrite("~p",[ValueRoot]).
+
+TestKey1 = lists:flatten( string:concat(KeyRootString, Pad_100 ++ Pad_100 ) ).
+TestKey2 = lists:flatten( string:concat(KeyRootString, Pad_10 ++ Pad_10 ) ).
+TestValue1 =
+  lists:flatten( string:concat(KeyRootString, Pad_100 ++ Pad_100 ) ).
+TestValue2 =
+  lists:flatten( string:concat(Value, Pad_100 ++ Pad_100 ) ).
+
+RecVal1 = [{"mbin1",TestValue1},{"mbin2",TestValue1}].
+RecVal2 = [{"mbin1",TestValue2},{"mbin2",TestValue2}].
+
+
+KRS1 = io_lib:fwrite("~p",[KeyRoot]).
+NewKey = string:concat(KeyRootString, Pad).
+NK1 = lists:flatten(string:concat(KRS1, Pad)).
+
+V1n=[{"mbin1","mvalue11"},{"mbin2","mvalue21"}].
+V2n=[{"mbin1","mvalue12"},{"mbin2","mvalue22"}].
+V3n=[{"mbin1","mvalue13"},{"mbin2","mvalue23"}].
+VT1=[{"mbin1",TestValue1}].
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%  Session 1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% Now we show a set of aerospike operations
+%% Connect to the local host on the default port
+NS = "test".
+S = "myset".
+K1="MyKeyONE" .
+K2="MyKeyTWO".
+K3="MyKeyThree".
+R1=[{"bin1","value1"}].
+R2=[{"bin1","value2"}].
+R3=[{"bin1","value3"}].
+R4=[{bin1, one_atom_12}, {bin2, two_atom_12} ].
+
+{ok, C} = aerospike:connect().
+
+%% Write a simple record (this should succeed)
+ok = aerospike:put(C,NS,S,K1,R1,0).
+
+%% Read it back (this should succeed)
+%% Result is a LIST of TUPLES:  e.g. [{BinName, Value},... {BinName, Value}]
+Result1  = aerospike:getAll(C,NS,S,K1,0).
+
+%% Show the result:
+Result1.
+% [{"bin1","value1"}]
+
+%% Let's do a write that is bad.  It's easy to make a bad key:
+BadKey = ["foo", 1,2,3].
+>>  aerospike:put(C,NS,S,BadKey,R1,0).
+>>  aerospike:getAll(C,NS,S,BadKey,0).
+
+Error Messages
+Get:
+{citrusleaf_error,{2,"CITRUSLEAF_FAIL_NOTFOUND"}}
+
+Put:
+ok
+{error,"Connection handle is not valid"} 
+
+
+%% This should work
+ok = aerospike:put(C,NS,S,TestKey2, RecVal1, 0 ).
+aerospike:getAll(C,NS,S,TestKey2,0).
+
+
+
+aerospike:put(C,NS,S,NewKey,V2,0).
+
+B1=[{"bin1"}].
+aerospike:get(C,NS,S,K1,B1,0).
+
+aerospike:put(C,NS,S,TestKey1,V1,0).
+
+% cli -o set -n "test" -s "myset" -k "MyKeyOne" -b "bin1" -v "Hey There"
+% 
+% cli -o get -n "test" -s "myset" -k "MyKeyOne" -b "bin1" 
+% 
+% cli -o delete -n "test" -s "myset" -k "MyKeyOne"
+
+% bench_test:bench(H,P,NS,S,20,80,32,200000,50000).
+% bench_test:bench(H,P,NS,S,20,80,64,200000,50000).
+% bench_test:bench(H,P,NS,S,20,80,128,200000,50000).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Here's some text to use with the Aerospike Command Line Interface (CLI)
+% You can read/write values directly from the Linux Shell
+%
+%Usage: cli [OPTIONS]...
+%Execute a command against an Aerospike cluster.
+%  -t, --target             a cluster node to query (host:port)
+%                           default: 127.0.0.1:3000
+%  -h, --host               host of the cluster node to query
+%                           default: 127.0.0.1
+%  -p, --port               port of the cluster node to query
+%                           default: 3000
+%  -o, --operand            the operand: get, set, delete
+%                           default: get
+%  -n  --namespace          the namespace to operate on
+%                           default: test
+%  -s  --set                the set the key belongs in
+%                           default: ""
+%  -k, --key                key
+%                           default: None
+%  -b, --bin                bin
+%                           default: ""
+%  -e, --recordttl          record TTL
+%                           default: None
+%  -v, --value              value
+%  -d, --digest             digest
+%  -i, --integer-key        True, if key is a integer
+%  --verbose                make the request verbose
+%  -u, --usage              show usage
+%
+cli -o set -n "test" -s "myset" -k "MyKeyOne" -b "bin1" -v "Hey There"
+
+cli -o get -n "test" -s "myset" -k "MyKeyOne" -b "bin1" 
+

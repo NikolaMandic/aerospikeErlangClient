@@ -1,0 +1,8 @@
+pushd ../c/cf_base
+make
+popd
+cp ../c/cf_base/src/*.c src/
+cp ../c/cl_c/src/*.c src/
+mkdir -p include/citrusleaf
+cp ../c/cl_c/include/citrusleaf/*.h include/citrusleaf/
+cp ../c/cf_base/include/citrusleaf/*.h include/citrusleaf/

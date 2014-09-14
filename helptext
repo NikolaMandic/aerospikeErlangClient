@@ -1,0 +1,46 @@
+
+H="127.0.0.1" .
+P=3000 .
+NS="test".
+K1="MyKeyONE" .
+K2="MyKeyTWO".
+S="myset".
+V1=[{"bin1","value1"}].
+V2=[{"bin2","value2"}].
+V11=[{"bin1","value1"}].
+V12=[{"bin1","value1"}].
+V21=[{"bin2","value2"}].
+V22=[{"bin2","value2"}].
+Pad="<<PADDING>>".
+
+KeyRoot = random:uniform( 100 ).
+KeyRootString =  io_lib:fwrite("~w",[KeyRoot]).
+
+NewKey = string:concat(KeyRootString, Pad).
+
+V1n=[{"mbin1","mvalue11"},{"mbin2","mvalue21"}].
+V2n=[{"mbin1","mvalue12"},{"mbin2","mvalue22"}].
+V3n=[{"mbin1","mvalue13"},{"mbin2","mvalue23"}].
+
+{ok, C} = citrusleaf:connect( H, P ).
+
+citrusleaf:put(C,NS,S,K1,V1,0).
+citrusleaf:getAll(C,NS,S,K1,0).
+
+citrusleaf:put(C,NS,S,NewKey,V2,0).
+
+B1=[{"bin1"}].
+citrusleaf:get(C,NS,S,K1,B1,0).
+
+
+cli -o set -n "test" -s "myset" -k "MyKeyOne" -b "bin1" -v "Hey There"
+
+cli -o get -n "test" -s "myset" -k "MyKeyOne" -b "bin1" 
+
+cli -o delete -n "test" -s "myset" -k "MyKeyOne"
+
+bench_test:bench(H,P,NS,S,20,80,32,200000,50000).
+bench_test:bench(H,P,NS,S,20,80,64,200000,50000).
+bench_test:bench(H,P,NS,S,20,80,128,200000,50000).
+
+
